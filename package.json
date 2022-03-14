@@ -16,6 +16,7 @@
     "typescript": "^4.6.2",
     "web-vitals": "^2.1.4"
   },
+  "homepage": "https://colin-tso.github.io/markdown-previewer/",
   "scripts": {
     "predeploy": "npm run build",
     "deploy": "gh-pages -d build",
