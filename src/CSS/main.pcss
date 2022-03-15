@@ -86,16 +86,22 @@ h1.pane-title {
 }
 
 .editor {
+    position: absolute;
+    top: 41px;
+    z-index: 99;
     border: solid 1px #999;
     text-align: left;
     font-family: var(--mono-font);
     font-size: inherit;
-    height: calc(100% - var(--pane-padding) - var(--h1-font-size));
-    width: calc(100% + var(--pane-padding));
+    height: calc(100% - var(--pane-padding) * 3 - var(--h1-font-size));
+    width: calc(100%);
     resize: none;
     overflow-x: hidden;
     scrollbar-gutter: stable;
     padding: var(--editor-padding);
+    color: transparent;
+    background: transparent;
+    caret-color: black;
 
     &::-webkit-scrollbar {
         width: 5px; /* Mostly for vertical scrollbars */
@@ -123,4 +129,36 @@ h1.pane-title {
 
 #app {
     height: 100%;
+}
+
+#editor-highlighted {
+    z-index: 0;
+    text-align: left;
+    font-family: var(--mono-font);
+    font-size: inherit;
+    height: calc(100% - var(--pane-padding) * 3 - var(--h1-font-size));
+    width: calc(100%);
+    overflow-x: hidden;
+    scrollbar-gutter: stable;
+    padding: var(--editor-padding);
+    background-color: rgb(0 0 0 / 0%);
+
+    &::-webkit-scrollbar {
+        width: 5px; /* Mostly for vertical scrollbars */
+        height: 5px; /* Mostly for horizontal scrollbars */
+    }
+
+    &::-webkit-scrollbar-thumb { /* Foreground */
+        background: var(--scrollbar-foreground);
+    }
+
+    &::-webkit-scrollbar-track { /* Background */
+        background: var(--scrollbar-background);
+    }
+}
+
+#editor-highlighted {
+    position: absolute;
+    top: 41px;
+    margin: 0;
 }

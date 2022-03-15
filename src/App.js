@@ -78,8 +78,6 @@ And here. | Okay. | I think we get it.
 ![freeCodeCamp Logo](https://cdn.freecodecamp.org/testable-projects-fcc/images/fcc_secondary.svg)
 `;
 
-
-
 class App extends React.Component {
   constructor(props) {
     super(props);
@@ -87,6 +85,11 @@ class App extends React.Component {
       mdInput: mdPlaceholder
     };
     this.handleChange = this.handleChange.bind(this);
+    this.onEditorScroll = this.onEditorScroll.bind(this);
+    this.editorScroll = React.createRef();
+    this.editorHighlightScroll = React.createRef();
+    this._preventEvent = false;
+    this.editorLastScroll = 0;
   }
   //handleChange
   handleChange(e) {
@@ -94,6 +97,20 @@ class App extends React.Component {
       mdInput: e.target.value
     });
   }
+  //handle editor scroll
+  onEditorScroll(e) {
+    if (this._preventEvent) {
+      this._preventEvent = false;
+      return;
+    }
+
+    if (e.target.scrollTop !== this.editorLastScroll) {
+      this._preventEvent = true;
+      this.editorScroll.current.scrollTop = e.target.scrollTop;
+      this.editorHighlightScroll.current.scrollTop = e.target.scrollTop;
+      this.editorLastScroll = e.target.scrollTop;
+    }
+  };
 
   render() {
     return (
@@ -101,7 +118,7 @@ class App extends React.Component {
 
         <ReflexElement className="left-pane">
           <h1 id="editor-title" className="pane-title">Markdown Editor</h1>
-          <MDEditor onChange={this.handleChange} mdInput={this.state.mdInput} />
+          <MDEditor onChange={this.handleChange} mdInput={this.state.mdInput} onScroll={this.onEditorScroll} editorRef={this.editorScroll} editorHighlightRef={this.editorHighlightScroll} />
         </ReflexElement>
 
         <ReflexSplitter />
@@ -117,14 +134,26 @@ class App extends React.Component {
 
 const MDEditor = (props) => {
   return (
-    <textarea
-      title="Markdown Editor"
-      id="editor"
-      className="pane-content editor"
-      placeholder="Enter your markdown code here"
-      onChange={props.onChange}
-      value={props.mdInput}
-    />
+    <React.Fragment>
+      <textarea
+        title="Markdown Editor"
+        id="editor"
+        className="pane-content editor"
+        spellCheck="false"
+        placeholder="Enter your markdown code here"
+        onChange={props.onChange}
+        value={props.mdInput}
+        onScroll={props.onScroll}
+        ref={props.editorRef}
+      />
+      <pre id="editor-highlighted" className="pane-content" ref={props.editorHighlightRef}>
+        <code
+          dangerouslySetInnerHTML={{
+            __html: HighlightJS.highlight(props.mdInput, { language: 'markdown' }).value
+          }}
+        />
+      </pre>
+    </React.Fragment>
   )
 }
 
