@@ -82,7 +82,7 @@ class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      mdInput: mdPlaceholder
+      mdInput: mdPlaceholder,
     };
     this.handleChange = this.handleChange.bind(this);
     this.onEditorScroll = this.onEditorScroll.bind(this);
@@ -90,7 +90,33 @@ class App extends React.Component {
     this.editorHighlightScroll = React.createRef();
     this._preventEvent = false;
     this.editorLastScroll = 0;
+    this.paneOrientation = "vertical";
+    this.lastWindowWidth = window.innerWidth;
   }
+
+  componentDidMount() {
+    window.addEventListener("resize", this.updateDimensions);
+  }
+  componentWillUnmount() {
+    window.removeEventListener("resize", this.updateDimensions);
+  }
+
+  updateDimensions = () => {
+    console.log("checking window dimensions")
+    console.log(window.innerWidth);
+    if (window.innerWidth <= 600 && window.innerWidth !== this.lastWindowWidth) {
+      console.log("changing orientation to horizontal");
+      this.paneOrientation = "horizontal";
+      this.lastWindowWidth = window.innerWidth;
+      this.forceUpdate();
+    } else if (window.innerWidth > 600 && window.innerWidth !== this.lastWindowWidth) {
+      console.log("changing orientation to vertical");
+      this.paneOrientation = "vertical";
+      this.lastWindowWidth = window.innerWidth;
+      this.forceUpdate();
+    }
+  };
+
   //handleChange
   handleChange(e) {
     this.setState({
@@ -114,7 +140,7 @@ class App extends React.Component {
 
   render() {
     return (
-      <ReflexContainer orientation="vertical">
+      <ReflexContainer orientation={this.paneOrientation}>
 
         <ReflexElement className="left-pane">
           <h1 id="editor-title" className="pane-title">Markdown Editor</h1>
