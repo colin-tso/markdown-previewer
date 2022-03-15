@@ -54,6 +54,7 @@
     "highlight.js": "^11.5.0",
     "marked": "^4.0.12",
     "npm-run-all": "^4.1.5",
+    "postcss": "^8.4.8",
     "postcss-cli": "^9.1.0",
     "postcss-nested": "^5.0.6",
     "react-reflex": "^4.0.6"
