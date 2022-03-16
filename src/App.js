@@ -83,19 +83,23 @@ class App extends React.Component {
     super(props);
     this.state = {
       mdInput: mdPlaceholder,
+      mdEditor: mdPlaceholder + " "
     };
     this.handleChange = this.handleChange.bind(this);
     this.onEditorScroll = this.onEditorScroll.bind(this);
+    this.syncScroll = this.syncScroll.bind(this);
     this.editorScroll = React.createRef();
     this.editorHighlightScroll = React.createRef();
     this._preventEvent = false;
     this.editorLastScroll = 0;
     this.paneOrientation = "vertical";
-    this.lastWindowWidth = window.innerWidth;
+    this.lastWindowWidth = 0;
   }
 
   componentDidMount() {
     window.addEventListener("resize", this.updateDimensions);
+    this.updateDimensions();
+    this.forceUpdate();
   }
   componentWillUnmount() {
     window.removeEventListener("resize", this.updateDimensions);
@@ -117,13 +121,22 @@ class App extends React.Component {
     }
   };
 
-  //handleChange
   handleChange(e) {
+    let m = '';
+    if (e.target.value[e.target.value.length - 1] == "\n") {
+      m = e.target.value + " ";
+      console.log('ends with new line')
+    } else {
+      m = e.target.value;
+    }
+
     this.setState({
-      mdInput: e.target.value
+      mdInput: e.target.value,
+      mdEditor: m
     });
+    this.syncScroll();
   }
-  //handle editor scroll
+
   onEditorScroll(e) {
     if (this._preventEvent) {
       this._preventEvent = false;
@@ -132,11 +145,31 @@ class App extends React.Component {
 
     if (e.target.scrollTop !== this.editorLastScroll) {
       this._preventEvent = true;
-      this.editorScroll.current.scrollTop = e.target.scrollTop;
-      this.editorHighlightScroll.current.scrollTop = e.target.scrollTop;
+      this.editorScroll.current.scrollTo({
+        top: e.target.scrollTop,
+        behaviour: 'smooth'
+      });
+      this.editorHighlightScroll.current.scrollTo({
+        top: e.target.scrollTop,
+        behaviour: 'smooth'
+      });
       this.editorLastScroll = e.target.scrollTop;
     }
   };
+
+  syncScroll() {
+    if (this.editorHighlightScroll.current.scrollTop !== this.editorScroll.current.scrollTop) {
+      console.log('syncing scroll');
+      this.editorHighlightScroll.current.scrollTo({
+        top: this.editorScroll.current.scrollTop,
+        behaviour: 'smooth'
+      });
+
+      // this.editorHighlightScroll.current.scrollTop = this.editorScroll.current.scrollTop;
+      console.log(this.editorHighlightScroll.current.scrollTop);
+      console.log(this.editorScroll.current.scrollTop);
+    }
+  }
 
   render() {
     return (
@@ -144,7 +177,15 @@ class App extends React.Component {
 
         <ReflexElement className="left-pane">
           <h1 id="editor-title" className="pane-title">Markdown Editor</h1>
-          <MDEditor onChange={this.handleChange} mdInput={this.state.mdInput} onScroll={this.onEditorScroll} editorRef={this.editorScroll} editorHighlightRef={this.editorHighlightScroll} />
+          <MDEditor
+            onChange={this.handleChange}
+            mdInput={this.state.mdInput}
+            mdEditor={this.state.mdEditor}
+            onScroll={this.onEditorScroll}
+            editorRef={this.editorScroll}
+            editorHighlightRef={this.editorHighlightScroll}
+            syncScroll={this.syncScroll}
+          />
         </ReflexElement>
 
         <ReflexSplitter />
@@ -170,12 +211,16 @@ const MDEditor = (props) => {
         onChange={props.onChange}
         value={props.mdInput}
         onScroll={props.onScroll}
+        onSelect={props.syncScroll}
+        onMouseMove={props.syncScroll}
+        onMouseLeave={props.syncScroll}
+        onKeyDown={props.syncScroll}
         ref={props.editorRef}
       />
       <pre id="editor-highlighted" className="pane-content" ref={props.editorHighlightRef}>
         <code
           dangerouslySetInnerHTML={{
-            __html: HighlightJS.highlight(props.mdInput, { language: 'markdown' }).value
+            __html: HighlightJS.highlight(props.mdEditor, { language: 'markdown' }).value
           }}
         />
       </pre>
